@@ -57,6 +57,11 @@ def validate_date_format(date):
     pattern = r'^\d{2}/\d{2}/\d{4}$'
     return re.match(pattern, date)
 
+# Regular expression to validate MAC address format for AP
+def validate_ap_mac_address(mac):
+    pattern = r'^[0-9A-Fa-f]{2}[-][0-9A-Fa-f]{2}[-][0-9A-Fa-f]{2}[-][0-9A-Fa-f]{2}[-][0-9A-Fa-f]{2}[-][0-9A-Fa-f]{2}[:][U][M]$'
+    return re.match(pattern, mac)
+
 # Function to display the menu and get the user's option
 def show_menu():
     print("\n--- Menú de Informes ---")
@@ -77,6 +82,7 @@ def main():
     while True:
         option = show_menu()
 
+
         if option == '1':
             user_id = input("Ingrese el ID del usuario:  ")
             user_sessions = list_sessions_by_user(records, user_id)
@@ -87,11 +93,28 @@ def main():
             else:
                 print(f"No se encontraron sesiones para el usuario con ID: {user_id}")
 
+
         elif option == '2':
             user_id = input("Ingrese el ID del usuario: ")
-            start_date = input("Ingrese la fecha de inicio (formato dd/mm/aaaa): ")
-            end_date = input("Ingrese la fecha de fin (formato dd/mm/aaaa): ")
+            
+            # Ask for the start date until the format is valid
+            while True:
+                start_date = input("Ingrese la fecha de inicio (formato dd/mm/aaaa): ")
+                if validate_date_format(start_date):
+                    break
+                else:
+                    print("Formato de fecha incorrecto. Por favor intente de nuevo.")
+
+            # Ask for the end date until the format is valid
+            while True:
+                end_date = input("Ingrese la fecha de fin (formato dd/mm/aaaa): ")
+                if validate_date_format(end_date):
+                    break
+                else:
+                    print("Formato de fecha incorrecto. Por favor intente de nuevo.")
+    
             filtered_sessions = list_login_sessions_by_date(records, user_id, start_date, end_date)
+
             if filtered_sessions:
                 print("Inicios de sesión del usuario en el rango de fechas:")
                 for session in filtered_sessions:
@@ -99,10 +122,12 @@ def main():
             else:
                 print(f"No se encontraron inicios de sesión para el usuario con ID: {user_id}")
 
+
         elif option == '3':
             user_id = input("Ingrese el ID del usuario:  ")
             total_time = total_session_time_by_user(records, user_id)
             print(f"Tiempo total de sesión del usuario con ID {user_id}: {total_time} minutos")
+
 
         elif option == '4':
             user_id = input("Ingrese el ID del usuario:  ")
@@ -112,10 +137,30 @@ def main():
             else:
                 print(f"No se encontró información de MAC para el usuario con ID: {user_id}")
 
+
         elif option == '5':
-            ap_mac = input("Ingrese la MAC del AP: ")
-            start_date = input("Ingrese la fecha de inicio (formato dd/mm/aaaa): ")
-            end_date = input("Ingrese la fecha de fin (formato dd/mm/aaaa): ")
+
+            while True:
+                ap_mac = input("Ingrese la MAC del AP: ")
+                if validate_ap_mac_address(ap_mac):
+                    break
+                else:
+                    print("Formato incorrecto de dirección MAC del AP. Por favor, inténtelo de nuevo.")
+
+            while True:
+                start_date = input("Ingrese la fecha de inicio (formato dd/mm/aaaa): ")
+                if validate_date_format(start_date):
+                    break
+                else:
+                    print("Formato de fecha incorrecto. Por favor intente de nuevo.")
+
+            while True:
+                end_date = input("Ingrese la fecha de fin (formato dd/mm/aaaa): ")
+                if validate_date_format(end_date):
+                    break
+                else:
+                    print("Formato de fecha incorrecto. Por favor intente de nuevo.")
+           
             connected_users = list_users_connected_to_ap_by_date(records, ap_mac, start_date, end_date)
             if connected_users:
                 print("Usuarios conectados al AP en el rango de fechas:")
@@ -124,12 +169,14 @@ def main():
             else:
                 print(f"No se encontraron usuarios conectados al AP con MAC: {ap_mac}")
 
+
         elif option == '0':
             print("¡Hasta luego!")
             break
 
         else:
             print("Opción inválida. Intente nuevamente.")
+
 
 if __name__ == "__main__":
     main()
