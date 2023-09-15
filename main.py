@@ -1,3 +1,6 @@
+import re
+
+
 # Function to load the file and extract the records
 def load_records(file_name):
     try:
@@ -48,6 +51,11 @@ def list_users_connected_to_ap_by_date(records, ap_mac, start_date, end_date):
         if start_date <= session_date <= end_date:
             filtered_users.append(user[1])
     return filtered_users
+
+# Regular expression to validate the format dd/mm/yyyy
+def validate_date_format(date):
+    pattern = r'^\d{2}/\d{2}/\d{4}$'
+    return re.match(pattern, date)
 
 # Function to display the menu and get the user's option
 def show_menu():
