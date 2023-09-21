@@ -33,8 +33,17 @@ def list_login_sessions_by_date(records, user_id, start_date, end_date):
 # Function to calculate the total session time of a user
 def total_session_time_by_user(records, user_id):
     user_sessions = [record for record in records if record[1] == user_id]
-    total_time = sum(int(session[4]) for session in user_sessions)
-    return total_time
+    total_seconds = sum(int(session[4]) for session in user_sessions)
+
+    # Convertir segundos a días, horas, minutos y segundos
+    days = total_seconds // (24 * 3600)
+    remaining_seconds = total_seconds % (24 * 3600)
+    hours = remaining_seconds // 3600
+    remaining_seconds %= 3600
+    minutes = remaining_seconds // 60
+    seconds = remaining_seconds % 60
+
+    return days, hours, minutes, seconds
 
 # Function to obtain the MAC address of a user to identify if they connected with one or multiple devices
 def get_user_mac_address(records, user_id):
@@ -125,8 +134,8 @@ def main():
 
         elif option == '3':
             user_id = input("Ingrese el ID del usuario:  ")
-            total_time = total_session_time_by_user(records, user_id)
-            print(f"Tiempo total de sesión del usuario con ID {user_id}: {total_time} minutos")
+            total_days, total_hours, total_minutes, total_seconds = total_session_time_by_user(records, user_id)
+            print(f"Tiempo total de sesión del usuario con ID {user_id}: {total_days} días, {total_hours} horas, {total_minutes} minutos, {total_seconds} segundos")
 
 
         elif option == '4':
