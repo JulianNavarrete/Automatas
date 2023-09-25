@@ -20,6 +20,32 @@ def list_sessions_by_user(records, user_id):
     user_sessions = [record for record in records if record[1] == user_id]
     return user_sessions
 
+# Function to ask user to show all the results or just the first 5 and the last 5
+def display_user_sessions(user_sessions):
+    if len(user_sessions) <= 15:
+        print("Sesiones del usuario:")
+        for session in user_sessions:
+            print(session)
+    else:
+        print(f"Hay {len(user_sessions)} sesiones disponibles para mostrar.")
+        choice = input("¿Desea mostrar todas las sesiones (T) o solo las primeras y las últimas 5 (F)? ").lower()
+        if choice == "t":
+            print("Sesiones del usuario:")
+            for session in user_sessions:
+                print(session)
+        elif choice == "f":
+            print("Primeras 5 sesiones del usuario:")
+            for session in user_sessions[:5]:
+                print(session)
+            print("\nÚltimas 5 sesiones del usuario:")
+            for session in user_sessions[-5:]:
+                print(session)
+        else:
+            print("Opción no válida. Mostrando todas las sesiones.")
+            print("Sesiones del usuario:")
+            for session in user_sessions:
+                print(session)
+
 # Function to list login sessions of a user within a specific date range
 def list_login_sessions_by_date(records, user_id, start_date, end_date):
     user_sessions = [record for record in records if record[1] == user_id]
@@ -35,13 +61,10 @@ def total_session_time_by_user(records, user_id):
     user_sessions = [record for record in records if record[1] == user_id]
     total_seconds = sum(int(session[4]) for session in user_sessions)
 
-    # Convertir segundos a días, horas, minutos y segundos
-    days = total_seconds // (24 * 3600)
-    remaining_seconds = total_seconds % (24 * 3600)
-    hours = remaining_seconds // 3600
-    remaining_seconds %= 3600
-    minutes = remaining_seconds // 60
-    seconds = remaining_seconds % 60
+    # Convert total seconds to days, hours, minutes, and seconds
+    days, seconds = divmod(total_seconds, 86400)
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
 
     return days, hours, minutes, seconds
 
@@ -54,16 +77,18 @@ def get_user_mac_address(records, user_id):
 # Function to list users connected to an AP based on the AP's MAC address and a specific date or date range
 def list_users_connected_to_ap_by_date(records, ap_mac, start_date, end_date):
     connected_users = [record for record in records if record[-2] == ap_mac]
-    filtered_users = []
+    user_count = {}
     for user in connected_users:
         session_date = user[2]
         if start_date <= session_date <= end_date:
-            filtered_users.append(user[1])
-    return filtered_users
+            username = user[1]
+            user_count[username] = user_count.get(username, 0) + 1
+
+    return user_count
 
 # Regular expression to validate the format dd/mm/yyyy
 def validate_date_format(date):
-    pattern = r'^\d{2}/\d{2}/\d{4}$'
+    pattern = r'^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/(2018|2019|2020|2021|2022|2023|2024)$'
     return re.match(pattern, date)
 
 # Regular expression to validate MAC address format for AP
@@ -93,12 +118,11 @@ def main():
 
 
         if option == '1':
-            user_id = input("Ingrese el ID del usuario:  ")
+            user_id = input("Ingrese el ID del usuario: ")
             user_sessions = list_sessions_by_user(records, user_id)
+
             if user_sessions:
-                print("Sesiones del usuario:")
-                for session in user_sessions:
-                    print(session)
+                display_user_sessions(user_sessions)
             else:
                 print(f"No se encontraron sesiones para el usuario con ID: {user_id}")
 
@@ -133,9 +157,11 @@ def main():
 
 
         elif option == '3':
-            user_id = input("Ingrese el ID del usuario:  ")
-            total_days, total_hours, total_minutes, total_seconds = total_session_time_by_user(records, user_id)
-            print(f"Tiempo total de sesión del usuario con ID {user_id}: {total_days} días, {total_hours} horas, {total_minutes} minutos, {total_seconds} segundos")
+            user_id = input("Ingrese el ID del usuario: ")
+            days, hours, minutes, seconds = total_session_time_by_user(records, user_id)
+
+            print(f"Tiempo total de sesión del usuario con ID {user_id}: {days} días, {hours} horas, {minutes} minutos y {seconds} segundos")
+            # print(f"{days} días, {hours} horas, {minutes} minutos y {seconds} segundos")
 
 
         elif option == '4':
@@ -169,12 +195,21 @@ def main():
                     break
                 else:
                     print("Formato de fecha incorrecto. Por favor intente de nuevo.")
-           
+            
+            '''
             connected_users = list_users_connected_to_ap_by_date(records, ap_mac, start_date, end_date)
             if connected_users:
                 print("Usuarios conectados al AP en el rango de fechas:")
                 for user in connected_users:
                     print(user)
+            '''
+            user_count = list_users_connected_to_ap_by_date(records, ap_mac, start_date, end_date)
+
+            if user_count:
+                print("Usuarios conectados al AP en el rango de fechas:")
+                for username, count in user_count.items():
+                    print(f"{username}: {count} veces")
+        
             else:
                 print(f"No se encontraron usuarios conectados al AP con MAC: {ap_mac}")
 
