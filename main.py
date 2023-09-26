@@ -21,28 +21,47 @@ def list_sessions_by_user(records, user_id):
     return user_sessions
 
 # Function to ask user to show all the results or just the first 5 and the last 5
-def display_user_sessions(user_sessions):
+def display_user_sessions(user_sessions, is_exercise_one, start_date, end_date):
     if len(user_sessions) <= 15:
-        print("Sesiones del usuario:")
+        if is_exercise_one == True:
+            print("\nSesiones del usuario:")
+        else:
+            print(f"\nSesiones del usuario entre las fechas {start_date} y {end_date}:")
+        
         for session in user_sessions:
             print(session)
     else:
         print(f"Hay {len(user_sessions)} sesiones disponibles para mostrar.")
         choice = input("¿Desea mostrar todas las sesiones (T) o solo las primeras y las últimas 5 (F)? ").lower()
         if choice == "t":
-            print("Sesiones del usuario:")
+            if is_exercise_one == True:
+                print("\nSesiones del usuario:")
+            else:
+                print(f"\nSesiones del usuario entre las fechas {start_date} y {end_date}:")
             for session in user_sessions:
                 print(session)
+
         elif choice == "f":
-            print("Primeras 5 sesiones del usuario:")
+            if is_exercise_one == True:
+                print("\nPrimeras 5 sesiones del usuario:")
+            else:
+                print(f"\nPrimeras 5 sesiones del usuario entre las fechas {start_date} y {end_date}:")
             for session in user_sessions[:5]:
                 print(session)
-            print("\nÚltimas 5 sesiones del usuario:")
+    
+            if is_exercise_one == True:
+                print("\nÚltimas 5 sesiones del usuario:")
+            else:
+                print(f"\nÚltimas 5 sesiones del usuario entre las fechas {start_date} y {end_date}:")
             for session in user_sessions[-5:]:
                 print(session)
+
         else:
             print("Opción no válida. Mostrando todas las sesiones.")
-            print("Sesiones del usuario:")
+            if is_exercise_one == True:
+                print("\nSesiones del usuario:")
+            else:
+                print(f"\nSesiones del usuario entre las fechas {start_date} y {end_date}:")
             for session in user_sessions:
                 print(session)
 
@@ -122,7 +141,8 @@ def main():
             user_sessions = list_sessions_by_user(records, user_id)
 
             if user_sessions:
-                display_user_sessions(user_sessions)
+                is_exercise_one = True
+                display_user_sessions(user_sessions, is_exercise_one, start_date=0, end_date=0)
             else:
                 print(f"No se encontraron sesiones para el usuario con ID: {user_id}")
 
@@ -149,11 +169,17 @@ def main():
             filtered_sessions = list_login_sessions_by_date(records, user_id, start_date, end_date)
 
             if filtered_sessions:
+                is_exercise_one = False
+                display_user_sessions(filtered_sessions, is_exercise_one, start_date, end_date)
+            else:
+                print(f"No se encontraron sesiones para el usuario con ID: {user_id} en el rango de fechas {start_date} a {end_date}")
+
+            '''if filtered_sessions:
                 print("Inicios de sesión del usuario en el rango de fechas:")
                 for session in filtered_sessions:
                     print(session)
             else:
-                print(f"No se encontraron inicios de sesión para el usuario con ID: {user_id}")
+                print(f"No se encontraron inicios de sesión para el usuario con ID: {user_id}")'''
 
 
         elif option == '3':
@@ -161,7 +187,6 @@ def main():
             days, hours, minutes, seconds = total_session_time_by_user(records, user_id)
 
             print(f"Tiempo total de sesión del usuario con ID {user_id}: {days} días, {hours} horas, {minutes} minutos y {seconds} segundos")
-            # print(f"{days} días, {hours} horas, {minutes} minutos y {seconds} segundos")
 
 
         elif option == '4':
@@ -195,14 +220,7 @@ def main():
                     break
                 else:
                     print("Formato de fecha incorrecto. Por favor intente de nuevo.")
-            
-            '''
-            connected_users = list_users_connected_to_ap_by_date(records, ap_mac, start_date, end_date)
-            if connected_users:
-                print("Usuarios conectados al AP en el rango de fechas:")
-                for user in connected_users:
-                    print(user)
-            '''
+
             user_count = list_users_connected_to_ap_by_date(records, ap_mac, start_date, end_date)
 
             if user_count:
